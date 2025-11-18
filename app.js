@@ -1,7 +1,9 @@
 import {
   categories as defaultCategories,
   dishes as defaultDishes,
-  tasteFilters
+  tasteFilters,
+  spiceFilters as defaultSpiceFilters,
+  saltFilters as defaultSaltFilters
 } from './src/data/dishes.js';
 
 const STORAGE_KEY = 'tom-restaurant-data-v1';
@@ -15,20 +17,32 @@ const heroGrid = document.getElementById('heroGrid');
 const cartCount = document.getElementById('cartCount');
 const cartTotal = document.getElementById('cartTotal');
 const tasteFilterWrap = document.getElementById('tasteFilters');
+const spiceFilterWrap = document.getElementById('spiceFilters');
+const saltFilterWrap = document.getElementById('saltFilters');
 const moodButton = document.getElementById('moodButton');
 const dishTemplate = document.getElementById('dishTemplate');
 const checkoutBtn = document.querySelector('.checkout-btn');
 const toast = document.getElementById('toast');
+const drinkListEl = document.getElementById('drinkList');
+const drinkMeta = document.getElementById('drinkMeta');
+
+const spiceFilters = defaultSpiceFilters;
+const saltFilters = defaultSaltFilters;
 
 const state = {
   categoryId: categories[0]?.id ?? 'featured',
   tasteFilter: 'all',
+  spiceFilter: 'all',
+  saltFilter: 'all',
   cart: {}
 };
 
 function init() {
   renderCategories();
   renderTasteFilters();
+  renderSpiceFilters();
+  renderSaltFilters();
+  renderDrinks();
   renderHeroCards();
   renderDishes();
   updateCartSummary();
@@ -60,21 +74,32 @@ function renderCategories() {
 }
 
 function renderTasteFilters() {
-  tasteFilterWrap.innerHTML = '';
-  tasteFilters.forEach((filter) => {
+  renderFilterChips(tasteFilterWrap, tasteFilters, 'tasteFilter');
+}
+
+function renderSpiceFilters() {
+  renderFilterChips(spiceFilterWrap, spiceFilters, 'spiceFilter');
+}
+
+function renderSaltFilters() {
+  renderFilterChips(saltFilterWrap, saltFilters, 'saltFilter');
+}
+
+function renderFilterChips(target, options, stateKey) {
+  if (!target) return;
+  target.innerHTML = '';
+  options.forEach((option) => {
     const chip = document.createElement('button');
     chip.className = 'filter-chip';
-    chip.textContent = filter.label;
-    if (filter.id === state.tasteFilter) chip.classList.add('active');
+    chip.textContent = option.label;
+    if (option.id === state[stateKey]) chip.classList.add('active');
     chip.addEventListener('click', () => {
-      state.tasteFilter = filter.id;
-      document
-        .querySelectorAll('.filter-chip')
-        .forEach((el) => el.classList.remove('active'));
+      state[stateKey] = option.id;
+      target.querySelectorAll('.filter-chip').forEach((el) => el.classList.remove('active'));
       chip.classList.add('active');
       renderDishes();
     });
-    tasteFilterWrap.appendChild(chip);
+    target.appendChild(chip);
   });
 }
 
@@ -129,20 +154,36 @@ function renderDishes() {
 
 function getVisibleDishes() {
   return dishes.filter((dish) => {
+    const isDrink = dish.categoryId === 'drinks';
     const matchCategory =
-      state.categoryId === 'featured' || dish.categoryId === state.categoryId;
-    const matchTaste = matchFilter(dish, state.tasteFilter);
-    return matchCategory && matchTaste;
+      state.categoryId === 'featured'
+        ? !isDrink
+        : dish.categoryId === state.categoryId;
+    const matchTaste = matchTasteFilter(dish, state.tasteFilter);
+    const matchSpiceLevel = matchSpice(dish, state.spiceFilter);
+    const matchSaltLevel = matchSalt(dish, state.saltFilter);
+    return matchCategory && matchTaste && matchSpiceLevel && matchSaltLevel;
   });
 }
 
-function matchFilter(dish, filter) {
+function matchTasteFilter(dish, filter) {
   if (filter === 'all') return true;
   if (filter === 'mild') return dish.tags.includes('少辣') || dish.heat === '不辣';
   if (filter === 'spicy') return dish.tags.includes('香辣') || dish.heat.includes('🌶');
   if (filter === 'comfort') return dish.tags.includes('下饭');
   if (filter === 'fitness') return dish.tags.includes('健身友好');
+  if (filter === 'quick') return dish.tags.includes('快手') || dish.categoryId === 'airfryer';
   return true;
+}
+
+function matchSpice(dish, filter) {
+  if (filter === 'all') return true;
+  return dish.spiceLevel === filter;
+}
+
+function matchSalt(dish, filter) {
+  if (filter === 'all') return true;
+  return dish.saltLevel === filter;
 }
 
 function addToCart(id) {
@@ -184,10 +225,37 @@ function attachGlobalEvents() {
       showToast('先随便挑两道菜吧～');
       return;
     }
-    showToast('收到！我马上安排给 adaaa ❤️');
+    showToast('收到！马上安排给 adaaa❤️tom');
     state.cart = {};
     updateCartSummary();
   });
+}
+
+function renderDrinks() {
+  if (!drinkListEl) return;
+  const drinks = dishes.filter((dish) => dish.categoryId === 'drinks');
+  drinkListEl.innerHTML = '';
+  drinks.forEach((drink) => {
+    const card = document.createElement('article');
+    card.className = 'drink-card';
+    card.innerHTML = `
+      <img src=\"${drink.image}\" alt=\"${drink.name}\" />
+      <h3>${drink.name}</h3>
+      <p>${drink.description}</p>
+      <div class=\"tags\">
+        ${drink.tags.map((tag) => `<span>${tag}</span>`).join('')}
+      </div>
+    `;
+    const btn = document.createElement('button');
+    btn.textContent = `安排 ¥${drink.price}`;
+    btn.addEventListener('click', () => addToCart(drink.id));
+    card.appendChild(btn);
+    drinkListEl.appendChild(card);
+  });
+  if (drinkMeta) {
+    const lowSugarCount = drinks.filter((d) => d.tags.includes('无糖') || d.tags.includes('低糖')).length;
+    drinkMeta.textContent = `${drinks.length} 款饮品 · ${lowSugarCount} 款无糖/低糖`;
+  }
 }
 
 function getCategoryName(id) {

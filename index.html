@@ -7,7 +7,7 @@
     <link rel="manifest" href="./public/manifest.json" />
     <link rel="icon" href="./public/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="./public/icons/icon-192.png" />
-    <title>adaaa❤️ 餐厅 | Tom 餐馆</title>
+    <title>adaaa❤️tom专属餐厅</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -18,7 +18,7 @@
         </div>
         <div class="header-meta">
           <div class="title-row">
-            <h1>adaaa❤️ 餐厅</h1>
+            <h1>adaaa❤️tom专属餐厅</h1>
             <span class="tag pink">YO</span>
             <span class="tag gold">开饭啦</span>
           </div>
@@ -27,7 +27,28 @@
         <button class="mood-button" id="moodButton">随机菜单</button>
       </header>
 
-      <section class="preferences" id="tasteFilters"></section>
+      <section class="preferences">
+        <div class="filter-group">
+          <p class="filter-label">主题推荐</p>
+          <div id="tasteFilters" class="chip-row"></div>
+        </div>
+        <div class="filter-group">
+          <p class="filter-label">辣度选择</p>
+          <div id="spiceFilters" class="chip-row"></div>
+        </div>
+        <div class="filter-group">
+          <p class="filter-label">咸度偏好</p>
+          <div id="saltFilters" class="chip-row"></div>
+        </div>
+      </section>
+
+      <section class="drink-panel">
+        <div class="drink-header">
+          <h2>今日饮料</h2>
+          <p id="drinkMeta"></p>
+        </div>
+        <div class="drink-list" id="drinkList"></div>
+      </section>
 
       <main class="app-main">
         <aside class="category-nav" id="categoryList"></aside>

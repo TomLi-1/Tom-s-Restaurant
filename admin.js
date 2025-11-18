@@ -81,6 +81,8 @@ function buildDishFromForm(formData) {
   const calories = Number(formData.get('calories')) || 0;
   const protein = Number(formData.get('protein')) || 0;
   const hero = formData.get('hero') === 'on';
+  const spiceLevel = formData.get('spiceLevel') || 'none';
+  const saltLevel = formData.get('saltLevel') || 'balanced';
 
   return {
     id: `${slugify(name)}-${Date.now().toString().slice(-4)}`,
@@ -93,7 +95,9 @@ function buildDishFromForm(formData) {
     protein,
     tags,
     image,
-    hero
+    hero,
+    spiceLevel,
+    saltLevel
   };
 }
 

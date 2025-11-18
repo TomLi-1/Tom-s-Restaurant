@@ -143,7 +143,8 @@ button.ghost {
 }
 
 .quick-form input,
-.quick-form textarea {
+.quick-form textarea,
+.quick-form select {
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   padding: 0.5rem 0.7rem;

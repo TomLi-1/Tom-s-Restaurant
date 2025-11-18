@@ -22,6 +22,7 @@
         <ul>
           <li>JSON 中包含 `categories`（分类）与 `dishes`（菜品）两个数组，可直接编辑。</li>
           <li>每个菜需要唯一 `id`，建议英文加数字，例如 `fit-bowl`。</li>
+          <li>`spiceLevel` 可选 `none/mild/spicy/extreme`，`saltLevel` 可选 `light/balanced/bold`，用于前台筛选。</li>
           <li>`image` 支持任意网络图片 URL，如需上传私有照片可放到图床后粘贴地址。</li>
           <li>保存只写入当前浏览器的 `localStorage`，不影响 Git 仓库。恢复默认即可还原。</li>
         </ul>
@@ -80,6 +81,23 @@
             <label>
               蛋白质 (g)
               <input type="number" name="protein" min="0" />
+            </label>
+            <label>
+              辣度
+              <select name="spiceLevel">
+                <option value="none">不辣</option>
+                <option value="mild">微辣</option>
+                <option value="spicy">香辣</option>
+                <option value="extreme">特辣</option>
+              </select>
+            </label>
+            <label>
+              咸度
+              <select name="saltLevel">
+                <option value="light">清爽</option>
+                <option value="balanced" selected>适中</option>
+                <option value="bold">重口味</option>
+              </select>
             </label>
             <label class="hero-flag">
               <input type="checkbox" name="hero" /> 今日特选
