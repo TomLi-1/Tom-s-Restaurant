@@ -16,21 +16,6 @@ export const tasteFilters = [
   { id: 'quick', label: '空气炸锅快手' }
 ];
 
-export const spiceFilters = [
-  { id: 'all', label: '全部辣度' },
-  { id: 'none', label: '不辣' },
-  { id: 'mild', label: '微辣' },
-  { id: 'spicy', label: '香辣' },
-  { id: 'extreme', label: '特辣' }
-];
-
-export const saltFilters = [
-  { id: 'all', label: '全部咸度' },
-  { id: 'light', label: '清爽少盐' },
-  { id: 'balanced', label: '适中' },
-  { id: 'bold', label: '重口味' }
-];
-
 export const dishes = [
   {
     id: 'sour-beef',
