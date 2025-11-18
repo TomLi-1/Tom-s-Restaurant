@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ff5678" />
+    <link rel="manifest" href="./public/manifest.json" />
+    <link rel="icon" href="./public/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./public/icons/icon-192.png" />
+    <title>Tom 餐馆</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="avatar">
+          <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=200&q=60" alt="头像" />
+        </div>
+        <div class="header-meta">
+          <div class="title-row">
+            <h1>星宝快乐餐厅</h1>
+            <span class="tag pink">YO</span>
+            <span class="tag gold">开饭啦</span>
+          </div>
+          <p class="subtitle">今日心情：随便都好，只要你做的 ❤️</p>
+        </div>
+        <button class="mood-button" id="moodButton">随机菜单</button>
+      </header>
+
+      <section class="preferences" id="tasteFilters"></section>
+
+      <main class="app-main">
+        <aside class="category-nav" id="categoryList"></aside>
+        <section class="dish-panel">
+          <div class="hero-grid" id="heroGrid"></div>
+          <div class="dish-list" id="dishList"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="cart-bar" id="cartBar">
+      <div>
+        <p class="cart-title">今日小篮子</p>
+        <p class="cart-meta"><span id="cartCount">0</span> 道菜 · ¥<span id="cartTotal">0</span></p>
+      </div>
+      <button class="checkout-btn">去结算</button>
+    </div>
+
+    <template id="dishTemplate">
+      <article class="dish-card">
+        <img class="dish-img" />
+        <div class="dish-info">
+          <div class="dish-title-row">
+            <h3></h3>
+            <span class="price"></span>
+          </div>
+          <p class="desc"></p>
+          <div class="meta"></div>
+        </div>
+        <button class="add-btn">+</button>
+      </article>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
