@@ -24,7 +24,8 @@ Tom 餐馆是一款专属女朋友Ada的点餐 PWA，帮她快速挑到心仪的
 cd tom-restaurant
 npx serve .
 ```
-访问 http://localhost:3000（或 serve 输出的端口）即可在浏览器/手机上体验，并且可以选择 “添加到主屏幕”。
+访问 http://localhost:3000
+（或 serve 输出的端口）即可在浏览器/手机上体验，并且可以选择 “添加到主屏幕”。
 
 ## 全栈拓展路线
 1. **数据层**：接入 Supabase/Firebase 或自建轻量 Node/Express + SQLite，提供菜品 CRUD 和用户偏好接口。
