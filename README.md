@@ -1,6 +1,6 @@
 # Tom 餐馆 PWA
 
-Tom 餐馆是一个仿照饿了么/美团外卖的简易 PWA，用来帮助女朋友快速决定吃什么。项目暂时使用纯 HTML/CSS/vanilla JS，以后可以替换为任意框架。整个结构保持轻量级，便于逐步演进为更完整的全栈应用。
+Tom 餐馆是一款专属情侣的点餐 PWA，帮女朋友快速挑到心仪的菜。项目暂时使用纯 HTML/CSS/vanilla JS，以后可以替换为任意框架。整个结构保持轻量级，便于逐步演进为更完整的全栈应用。
 
 ## 功能规划
 - 支持湘菜、粤菜、空气炸锅、健身餐等多种分类，并可在 `src/data/dishes.js` 中随时追加
@@ -14,6 +14,10 @@ Tom 餐馆是一个仿照饿了么/美团外卖的简易 PWA，用来帮助女�
 - `src/data/dishes.js` 用于集中管理菜品数据
 - `public/manifest.json` & `sw.js` 保证 PWA 能力
 - 将来可接入云函数/数据库，或迁移到 Next.js/Remix 等全栈框架
+
+## 如何新增 / 修改菜品
+- 最直接的方式是在 `src/data/dishes.js` 中编辑 `categories` 与 `dishes` 数组。只要替换 `image` 为你喜欢的图片地址、调整 `name/description/price/tags` 即可。
+- 如果不想碰源码，可以访问 `admin.html`（例如 http://localhost:3000/admin.html），在“可视化数据编辑”界面里直接修改 JSON 数据并保存到浏览器 `localStorage`。主页面会自动读取最新的本地配置，想恢复默认可点击“恢复默认菜单”。
 
 ## 本地运行
 ```bash

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tom 餐馆 · 菜单管理</title>
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body>
+    <main class="admin">
+      <header class="admin__header">
+        <div>
+          <p class="eyebrow">Tom 餐馆</p>
+          <h1>菜单配置中心</h1>
+          <p class="subtitle">在这里修改菜品名称、图片、价格，保存后主页面会立即生效。</p>
+        </div>
+        <a class="link-button" href="./index.html">返回点餐界面</a>
+      </header>
+
+      <section class="panel">
+        <h2>操作提示</h2>
+        <ul>
+          <li>JSON 中包含 `categories`（分类）与 `dishes`（菜品）两个数组，可直接编辑。</li>
+          <li>每个菜需要唯一 `id`，建议英文加数字，例如 `fit-bowl`。</li>
+          <li>`image` 支持任意网络图片 URL，如需上传私有照片可放到图床后粘贴地址。</li>
+          <li>保存只写入当前浏览器的 `localStorage`，不影响 Git 仓库。恢复默认即可还原。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>可视化数据编辑</h2>
+          <div class="stats" id="stats"></div>
+        </div>
+        <textarea id="dataEditor" spellcheck="false"></textarea>
+        <div class="actions">
+          <button id="saveBtn" class="primary">保存到浏览器</button>
+          <button id="copyBtn">复制 JSON</button>
+          <button id="resetBtn" class="ghost">恢复默认菜单</button>
+        </div>
+        <p class="status" id="status"></p>
+      </section>
+
+      <section class="panel">
+        <h2>快速新增菜品</h2>
+        <form id="quickAddForm" class="quick-form">
+          <label>
+            菜名
+            <input type="text" name="name" required placeholder="例：酱烤鸡翅" />
+          </label>
+          <label>
+            分类 ID
+            <input type="text" name="categoryId" required placeholder="hunan / cantonese 等" />
+          </label>
+          <label>
+            简介
+            <input type="text" name="description" placeholder="可选描述" />
+          </label>
+          <label>
+            价格 (¥)
+            <input type="number" name="price" min="0" required />
+          </label>
+          <label>
+            辣度/提示
+            <input type="text" name="heat" placeholder="🌶🌶 / 不辣 等" />
+          </label>
+          <label>
+            图片 URL
+            <input type="url" name="image" placeholder="https://" />
+          </label>
+          <label>
+            标签（逗号分隔）
+            <input type="text" name="tags" placeholder="香辣, 下饭" />
+          </label>
+          <div class="form-row">
+            <label>
+              卡路里 (kcal)
+              <input type="number" name="calories" min="0" />
+            </label>
+            <label>
+              蛋白质 (g)
+              <input type="number" name="protein" min="0" />
+            </label>
+            <label class="hero-flag">
+              <input type="checkbox" name="hero" /> 今日特选
+            </label>
+          </div>
+          <button type="submit" class="primary">插入到 JSON</button>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="./admin.js"></script>
+  </body>
+</html>

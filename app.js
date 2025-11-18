@@ -1,4 +1,13 @@
-import { categories, dishes, tasteFilters } from './src/data/dishes.js';
+import {
+  categories as defaultCategories,
+  dishes as defaultDishes,
+  tasteFilters
+} from './src/data/dishes.js';
+
+const STORAGE_KEY = 'tom-restaurant-data-v1';
+const menuData = loadMenuData();
+const categories = menuData.categories;
+const dishes = menuData.dishes;
 
 const categoryList = document.getElementById('categoryList');
 const dishList = document.getElementById('dishList');
@@ -8,9 +17,11 @@ const cartTotal = document.getElementById('cartTotal');
 const tasteFilterWrap = document.getElementById('tasteFilters');
 const moodButton = document.getElementById('moodButton');
 const dishTemplate = document.getElementById('dishTemplate');
+const checkoutBtn = document.querySelector('.checkout-btn');
+const toast = document.getElementById('toast');
 
 const state = {
-  categoryId: categories[0].id,
+  categoryId: categories[0]?.id ?? 'featured',
   tasteFilter: 'all',
   cart: {}
 };
@@ -27,6 +38,10 @@ function init() {
 
 function renderCategories() {
   categoryList.innerHTML = '';
+  if (!categories.length) {
+    categoryList.innerHTML = '<p>暂无分类</p>';
+    return;
+  }
   categories.forEach((category) => {
     const btn = document.createElement('button');
     btn.className = 'category-btn';
@@ -153,6 +168,7 @@ function updateCartSummary() {
 
 function attachGlobalEvents() {
   moodButton.addEventListener('click', () => {
+    if (!dishes.length) return;
     const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
     state.categoryId = randomDish.categoryId;
     state.tasteFilter = 'all';
@@ -160,6 +176,17 @@ function attachGlobalEvents() {
     renderTasteFilters();
     renderDishes();
     addToCart(randomDish.id);
+  });
+
+  checkoutBtn.addEventListener('click', () => {
+    const total = Number(cartTotal.textContent);
+    if (total === 0) {
+      showToast('先随便挑两道菜吧～');
+      return;
+    }
+    showToast('收到！我马上安排给 adaaa ❤️');
+    state.cart = {};
+    updateCartSummary();
   });
 }
 
@@ -173,6 +200,46 @@ function registerServiceWorker() {
       console.warn('SW registration failed', err);
     });
   }
+}
+
+function loadMenuData() {
+  if (!supportsLocalStorage()) return getDefaultMenu();
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return getDefaultMenu();
+    const parsed = JSON.parse(stored);
+    const customCategories =
+      Array.isArray(parsed.categories) && parsed.categories.length
+        ? parsed.categories
+        : defaultCategories;
+    const customDishes =
+      Array.isArray(parsed.dishes) && parsed.dishes.length ? parsed.dishes : defaultDishes;
+    return { categories: customCategories, dishes: customDishes };
+  } catch (error) {
+    console.warn('加载自定义菜单失败，已使用默认菜单', error);
+    return getDefaultMenu();
+  }
+}
+
+function getDefaultMenu() {
+  return { categories: defaultCategories, dishes: defaultDishes };
+}
+
+function supportsLocalStorage() {
+  try {
+    return typeof window !== 'undefined' && 'localStorage' in window;
+  } catch (error) {
+    return false;
+  }
+}
+
+let toastTimer;
+function showToast(message) {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
 init();

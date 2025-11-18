@@ -295,6 +295,26 @@ img {
   cursor: pointer;
 }
 
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 4.5rem;
+  transform: translate(-50%, 20px);
+  padding: 0.65rem 1.2rem;
+  border-radius: 18px;
+  background: rgba(22, 16, 18, 0.92);
+  color: #fff;
+  font-size: 0.95rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 @media (max-width: 768px) {
   .app-main {
     grid-template-columns: 1fr;

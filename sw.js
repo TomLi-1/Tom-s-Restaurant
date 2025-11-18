@@ -4,6 +4,9 @@ const ASSETS = [
   './index.html',
   './styles.css',
   './app.js',
+  './admin.html',
+  './admin.js',
+  './admin.css',
   './src/data/dishes.js',
   './public/manifest.json'
 ];
