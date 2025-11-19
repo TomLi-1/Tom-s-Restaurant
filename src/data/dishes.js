@@ -1,9 +1,11 @@
 export const categories = [
   { id: 'featured', name: '今日特选', emoji: '✨', description: '随便挑一个惊喜' },
   { id: 'hunan', name: '湘菜', emoji: '🌶', description: '重口味、够辣爽' },
+  { id: 'sichuan', name: '川菜', emoji: '🍃', description: '待老公开发' },
   { id: 'cantonese', name: '粤菜', emoji: '🥢', description: '清淡鲜甜' },
   { id: 'airfryer', name: '空气炸锅', emoji: '⚡️', description: '10 分钟就能开吃' },
   { id: 'fit', name: '健身餐', emoji: '💪', description: '高蛋白低油盐' },
+  { id: 'fastfood', name: '快餐', emoji: '🍜', description: '等不了一点儿' },
   { id: 'drinks', name: '饮品', emoji: '🥤', description: '今日饮料/无糖' }
 ];
 
@@ -36,8 +38,8 @@ export const dishes = [
   {
     id: 'duojiao-fish-head',
     categoryId: 'hunan',
-    name: '剁椒鱼头',
-    description: '蒸汽锁鲜，糯米椒辣度可调',
+    name: '酸菜鱼',
+    description: '酸菜比鱼好吃！',
     price: 48,
     heat: '🌶🌶🌶',
     calories: 430,
@@ -45,8 +47,7 @@ export const dishes = [
     spiceLevel: 'extreme',
     saltLevel: 'bold',
     tags: ['香辣'],
-    image:
-      'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=60'
+    image: 'https://imgs.699pic.com/images/603/633/389.jpg!seo.v1'
   },
   {
     id: 'hongshaorou',
@@ -66,7 +67,7 @@ export const dishes = [
   {
     id: 'qingzheng-yuji',
     categoryId: 'cantonese',
-    name: '清蒸鲈鱼',
+    name: '葱油手撕鸡',
     description: '姜丝酱油，超嫩多汁',
     price: 58,
     heat: '不辣',
@@ -75,14 +76,13 @@ export const dishes = [
     spiceLevel: 'none',
     saltLevel: 'balanced',
     tags: ['少辣', '健身友好'],
-    image:
-      'https://images.unsplash.com/photo-1589985270826-2e4c9e90a04e?auto=format&fit=crop&w=900&q=60',
+    image: 'https://imgs.699pic.com/images/350/056/060.jpg!seo.v1',
     hero: true
   },
   {
     id: 'airfryer-wings',
     categoryId: 'airfryer',
-    name: '空气炸锅蜜汁鸡翅',
+    name: '空气炸锅鸡翅',
     description: '15 分钟完成，0 油烟',
     price: 26,
     heat: '微辣',
@@ -184,5 +184,35 @@ export const dishes = [
     tags: ['低糖', '蛋白质'],
     image:
       'https://images.unsplash.com/photo-1504753793650-d4a2b783c15f?auto=format&fit=crop&w=900&q=60'
+  },
+  {
+    id: 'dish-1763528781376-1376',
+    categoryId: 'cantonese',
+    name: '可乐鸡翅',
+    description: '零糖鸡翅，ada最爱',
+    price: 38,
+    heat: '不辣',
+    calories: 380,
+    protein: 30,
+    tags: ['健康，美味'],
+    image: 'https://imgs.699pic.com/images/500/945/803.jpg!seo.v1',
+    hero: true,
+    spiceLevel: 'none',
+    saltLevel: 'balanced'
+  },
+  {
+    id: 'dish-1763551363898-3898',
+    categoryId: 'sichuan',
+    name: '火锅',
+    description: '在寒冷的冬天用热热的火锅温暖你～',
+    price: 1,
+    heat: '微辣',
+    calories: 'n',
+    protein: 'n',
+    tags: ['暖胃'],
+    image: 'https://imgs.699pic.com/images/507/180/335.jpg!seo.v1',
+    hero: false,
+    spiceLevel: 'mild',
+    saltLevel: 'balanced'
   }
 ];
