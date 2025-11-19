@@ -1,6 +1,6 @@
 # Tom 餐馆 PWA
 
-adaaa❤️tom专属餐厅是一款专属情侣的点餐 PWA，帮女朋友随时挑菜。项目暂时使用纯 HTML/CSS/vanilla JS，以后可迁移到任意框架。
+adaaa♡tom专属餐厅是一款专属我女朋友ada的点餐 PWA，帮她随时挑菜。项目暂时使用纯 HTML/CSS/vanilla JS，以后可迁移到任意框架。
 
 ## 功能亮点
 - 湘菜 / 粤菜 / 空气炸锅 / 健身餐 / 饮品等分类，集中配置在 `src/data/dishes.js`
@@ -9,9 +9,6 @@ adaaa❤️tom专属餐厅是一款专属情侣的点餐 PWA，帮女朋友随�
 - 结算按钮会弹出订单汇总弹窗，可填写备注，并可通过 Server酱把信息推送到你的微信
 - 支持 PWA 安装、离线缓存与 GitHub Pages 自动部署
 
-## 更换头像与昵称
-- 头像图片在 `index.html` 的 `<div class="avatar">` 内，把 `img` 标签的 `src` 改成你们的合照链接即可（建议使用 200×200 的方形图）。
-- 标题“adaaa❤️tom专属餐厅”也在 `index.html` 中，可随时替换。
 
 ## 如何新增 / 修改菜品
 1. **编辑数据文件**：在 `src/data/dishes.js` 添加或修改 `dishes`，字段示例：
@@ -32,6 +29,7 @@ adaaa❤️tom专属餐厅是一款专属情侣的点餐 PWA，帮女朋友随�
    ```
 2. **Admin 工具**：访问 `http://localhost:3000/admin.html`，在可视化 JSON 编辑器或“快速新增菜品”中操作，结果只会保存在浏览器 `localStorage`；
    点击“保存到浏览器”后主界面会自动读取，恢复默认请按“恢复默认菜单”。
+3. **一键同步 JSON**：在 admin 页点击“复制 JSON”存成 `menu.json`，然后运行 `python scripts/import_menu.py menu.json`，脚本会自动把内容写入 `src/data/dishes.js` 并保持格式一致，下次 push 就能同步到线上版本。
 
 ## 订单推送到微信（Server酱）
 1. 在 [Server酱](https://sct.ftqq.com/) 登录并获取 SendKey（形如 `SCTxxxxxxxx`）。
