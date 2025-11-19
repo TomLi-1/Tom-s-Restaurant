@@ -32,12 +32,17 @@
         </div>
       </section>
 
-      <section class="drink-panel">
-        <div class="drink-header">
-          <h2>今日饮料</h2>
-          <p id="drinkMeta"></p>
+      <section class="insights-panel">
+        <div class="insights-header">
+          <div>
+            <p class="eyebrow">今日状态</p>
+            <h2>一周饮食光谱</h2>
+            <p id="insightSummary">记录你们的饮食节奏</p>
+          </div>
+          <button class="log-btn" id="logTodayBtn">记录今天</button>
         </div>
-        <div class="drink-list" id="drinkList"></div>
+        <div class="insights-chart" id="weeklyChart"></div>
+        <div class="insights-tags" id="weeklyBadges"></div>
       </section>
 
       <main class="app-main">
@@ -105,6 +110,20 @@
           <button class="primary" id="orderSubmitBtn">发送给 Tom</button>
         </div>
         <p class="modal-tip">说明：留空 SendKey 只会在本界面记录；填写后会通过 Server酱 推送到你的微信。</p>
+      </div>
+    </div>
+
+    <div class="modal" id="moodModal">
+      <div class="modal-content">
+        <button class="modal-close" data-close>&times;</button>
+        <p class="modal-eyebrow">Dinner mood</p>
+        <h3>今天想吃点什么？</h3>
+        <div class="spice-options" id="moodOptions"></div>
+        <div class="modal-actions">
+          <button class="ghost" id="moodCancelBtn">算了，自己选</button>
+          <button class="primary" id="moodConfirmBtn">走一个</button>
+        </div>
+        <button class="omakase" id="omakaseBtn">我就是不想选，交给老公 Omakase</button>
       </div>
     </div>
 

@@ -21,8 +21,10 @@ const moodButton = document.getElementById('moodButton');
 const dishTemplate = document.getElementById('dishTemplate');
 const checkoutBtn = document.querySelector('.checkout-btn');
 const toast = document.getElementById('toast');
-const drinkListEl = document.getElementById('drinkList');
-const drinkMeta = document.getElementById('drinkMeta');
+const weeklyChart = document.getElementById('weeklyChart');
+const insightSummary = document.getElementById('insightSummary');
+const weeklyBadges = document.getElementById('weeklyBadges');
+const logTodayBtn = document.getElementById('logTodayBtn');
 const spiceModal = document.getElementById('spiceModal');
 const spiceDishName = document.getElementById('spiceDishName');
 const spiceDishDesc = document.getElementById('spiceDishDesc');
@@ -35,6 +37,11 @@ const orderNote = document.getElementById('orderNote');
 const orderSubmitBtn = document.getElementById('orderSubmitBtn');
 const orderCancelBtn = document.getElementById('orderCancelBtn');
 const serverKeyInput = document.getElementById('serverKeyInput');
+const moodModal = document.getElementById('moodModal');
+const moodOptionsWrap = document.getElementById('moodOptions');
+const moodConfirmBtn = document.getElementById('moodConfirmBtn');
+const moodCancelBtn = document.getElementById('moodCancelBtn');
+const omakaseBtn = document.getElementById('omakaseBtn');
 
 const state = {
   categoryId: categories[0]?.id ?? 'featured',
@@ -57,7 +64,7 @@ function init() {
   renderTasteFilters();
   renderHeroCards();
   renderDishes();
-  renderDrinks();
+  renderWeeklyInsights();
   updateCartSummary();
   attachGlobalEvents();
   registerServiceWorker();
@@ -184,6 +191,7 @@ function handleAddDish(dish) {
   if (dish.categoryId === 'drinks') {
     addToCart(dish.id, { spice: '冰爽' });
     showToast(`饮品已加入：${dish.name}`);
+    logDishToWeekly(dish);
     return;
   }
   openSpiceModal(dish);
@@ -211,19 +219,17 @@ function updateCartSummary() {
 }
 
 function attachGlobalEvents() {
-  moodButton.addEventListener('click', () => {
-    if (!dishes.length) return;
-    const randomDish = dishes[Math.floor(Math.random() * dishes.length)];
-    state.categoryId = randomDish.categoryId;
-    state.tasteFilter = 'all';
-    renderCategories();
-    renderTasteFilters();
-    renderDishes();
-    addToCart(randomDish.id, { spice: getSpiceLabel(randomDish.spiceLevel) });
-    showToast(`惊喜安排：${randomDish.name}`);
-  });
+  moodButton.addEventListener('click', openMoodModal);
 
   checkoutBtn.addEventListener('click', openCheckoutModal);
+  logTodayBtn?.addEventListener('click', () => {
+    logTodayIntake();
+    renderWeeklyInsights();
+  });
+  logTodayBtn?.addEventListener('click', () => {
+    logTodayIntake();
+    renderWeeklyInsights();
+  });
 
   spiceConfirmBtn?.addEventListener('click', handleSpiceConfirm);
   spiceModal?.addEventListener('click', (event) => {
@@ -239,36 +245,73 @@ function attachGlobalEvents() {
   });
   orderCancelBtn?.addEventListener('click', () => closeModal(checkoutModal));
   orderSubmitBtn?.addEventListener('click', submitOrder);
+  moodModal?.addEventListener('click', (event) => {
+    if (event.target === moodModal || event.target.dataset.close !== undefined) {
+      closeModal(moodModal);
+    }
+  });
+  moodCancelBtn?.addEventListener('click', () => closeModal(moodModal));
+  moodConfirmBtn?.addEventListener('click', confirmMoodChoice);
+  omakaseBtn?.addEventListener('click', () => {
+    closeModal(moodModal);
+    serveOmakase();
+  });
 }
 
-function renderDrinks() {
-  if (!drinkListEl) return;
-  const drinks = dishes.filter((dish) => dish.categoryId === 'drinks');
-  drinkListEl.innerHTML = '';
-  drinks.forEach((drink) => {
-    const card = document.createElement('article');
-    card.className = 'drink-card';
-    card.innerHTML = `
-      <img src="${drink.image}" alt="${drink.name}" />
-      <h3>${drink.name}</h3>
-      <p>${drink.description}</p>
-      <div class="tags">
-        ${drink.tags.map((tag) => `<span>${tag}</span>`).join('')}
-      </div>
-    `;
-    const btn = document.createElement('button');
-    btn.textContent = `安排 ¥${drink.price}`;
-    btn.addEventListener('click', () => {
-      addToCart(drink.id, { spice: '冰爽' });
-      showToast(`饮品已加入：${drink.name}`);
-    });
-    card.appendChild(btn);
-    drinkListEl.appendChild(card);
-  });
-  if (drinkMeta) {
-    const lowSugarCount = drinks.filter((d) => d.tags.includes('无糖') || d.tags.includes('低糖')).length;
-    drinkMeta.textContent = `${drinks.length} 款饮品 · ${lowSugarCount} 款无糖/低糖`;
+const WEEKLY_STORAGE_KEY = 'tom-weekly-intake-v1';
+
+function getWeeklyData() {
+  const today = new Date();
+  const currentWeek = `${today.getFullYear()}-${getWeekNumber(today)}`;
+  try {
+    const saved = JSON.parse(localStorage.getItem(WEEKLY_STORAGE_KEY) || '{}');
+    if (saved.week !== currentWeek) {
+      return { week: currentWeek, days: defaultWeek() };
+    }
+    return saved;
+  } catch (e) {
+    return { week: currentWeek, days: defaultWeek() };
   }
+}
+
+function defaultWeek() {
+  return ['一', '二', '三', '四', '五', '六', '日'].map((label) => ({ label, value: 0 }));
+}
+
+function getWeekNumber(date) {
+  const onejan = new Date(date.getFullYear(), 0, 1);
+  const millisecsInDay = 86400000;
+  return Math.ceil(((date - onejan) / millisecsInDay + onejan.getDay() + 1) / 7);
+}
+
+function renderWeeklyInsights() {
+  if (!weeklyChart || !weeklyBadges) return;
+  const data = getWeeklyData();
+  weeklyChart.innerHTML = '';
+  data.days.forEach((day) => {
+    const bar = document.createElement('div');
+    bar.className = 'insight-bar';
+    bar.innerHTML = `
+      <div class="bar">
+        <div class="bar-fill" style="height:${Math.min(day.value, 100)}%"></div>
+      </div>
+      <span>${day.label}</span>
+    `;
+    weeklyChart.appendChild(bar);
+  });
+  const avg = Math.round(data.days.reduce((sum, d) => sum + d.value, 0) / data.days.length);
+  insightSummary.textContent = avg > 70 ? '这周吃得很满足，记得多喝水 💧' : '还有空间尝试新口味 ✨';
+  weeklyBadges.innerHTML = '';
+  const badges = [];
+  if (avg < 40) badges.push('少油少盐周');
+  if (avg > 80) badges.push('重口味冒险周');
+  if (data.days.filter((d) => d.value > 60).length >= 5) badges.push('连续好胃口');
+  if (!badges.length) badges.push('记录你的每一餐');
+  badges.forEach((badge) => {
+    const span = document.createElement('span');
+    span.textContent = badge;
+    weeklyBadges.appendChild(span);
+  });
 }
 
 function getCategoryName(id) {
@@ -290,6 +333,74 @@ function openSpiceModal(dish) {
   spiceDishDesc.textContent = dish.description;
   renderSpiceOptions(selectedSpiceLabel);
   showModal(spiceModal);
+}
+
+const moodOptions = [
+  { id: 'hunan', label: '湘菜下饭', emoji: '🌶' },
+  { id: 'sichuan', label: '川菜冒汗', emoji: '🔥' },
+  { id: 'cantonese', label: '粤菜清淡', emoji: '🥢' },
+  { id: 'airfryer', label: '空气炸锅快手', emoji: '⚡️' },
+  { id: 'fit', label: '健身友好', emoji: '💪' }
+];
+let selectedMood = null;
+
+function openMoodModal() {
+  selectedMood = null;
+  renderMoodOptions();
+  showModal(moodModal);
+}
+
+function renderMoodOptions() {
+  if (!moodOptionsWrap) return;
+  moodOptionsWrap.innerHTML = '';
+  moodOptions.forEach((option) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-chip';
+    btn.type = 'button';
+    btn.innerHTML = `<span>${option.emoji}</span> <span>${option.label}</span>`;
+    btn.addEventListener('click', () => {
+      selectedMood = option.id;
+      moodOptionsWrap.querySelectorAll('.option-chip').forEach((el) => el.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    moodOptionsWrap.appendChild(btn);
+  });
+}
+
+function confirmMoodChoice() {
+  if (!selectedMood) {
+    showToast('先选一个主题吧');
+    return;
+  }
+  closeModal(moodModal);
+  const candidates = dishes.filter((dish) => dish.categoryId === selectedMood);
+  const choice = candidates[Math.floor(Math.random() * candidates.length)];
+  if (!choice) {
+    showToast('该主题暂无菜品，换一个吧');
+    return;
+  }
+  state.categoryId = choice.categoryId;
+  state.tasteFilter = 'all';
+  renderCategories();
+  renderTasteFilters();
+  renderDishes();
+  addToCart(choice.id, { spice: getSpiceLabel(choice.spiceLevel) });
+  logDishToWeekly(choice);
+  showToast(`安排 ${choice.name}`);
+}
+
+function serveOmakase() {
+  closeModal(moodModal);
+  const weakSpots = getWeeklyData().days
+    .map((day, idx) => ({ idx, value: day.value }))
+    .sort((a, b) => a.value - b.value);
+  const categoryPool = ['hunan', 'sichuan', 'cantonese', 'airfryer', 'fit'];
+  const nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
+  const candidates = dishes.filter((dish) => dish.categoryId === nextCategory);
+  const choice = candidates[Math.floor(Math.random() * candidates.length)] || dishes[0];
+  addToCart(choice.id, { spice: getSpiceLabel(choice.spiceLevel) });
+  logDishToWeekly(choice);
+  showToast(`Omakase：${choice.name}`);
 }
 
 function renderSpiceOptions(activeLabel) {
@@ -316,6 +427,7 @@ function handleSpiceConfirm() {
     return;
   }
   addToCart(pendingDish.id, { spice: selectedSpiceLabel });
+  logDishToWeekly(pendingDish);
   showToast(`${pendingDish.name} · ${selectedSpiceLabel}`);
   pendingDish = null;
   closeModal(spiceModal);
@@ -379,6 +491,7 @@ async function submitOrder() {
   showToast(notifyResult.success ? '已发送给 Tom ❤️' : '订单已记录，稍后告诉 Tom');
   state.cart = {};
   updateCartSummary();
+  renderWeeklyInsights();
   closeModal(checkoutModal);
 }
 
@@ -435,6 +548,27 @@ function getSpiceLabel(level) {
   if (!level) return '主厨推荐';
   const found = spicePresets.find((preset) => preset.id === level);
   return found?.label ?? '主厨推荐';
+}
+
+function logDishToWeekly(dish) {
+  const weekly = getWeeklyData();
+  const index = getTodayIndex();
+  weekly.days[index].value = Math.min(100, weekly.days[index].value + 20);
+  localStorage.setItem(WEEKLY_STORAGE_KEY, JSON.stringify(weekly));
+  renderWeeklyInsights();
+}
+
+function logTodayIntake() {
+  const weekly = getWeeklyData();
+  const index = getTodayIndex();
+  weekly.days[index].value = Math.min(100, weekly.days[index].value + 10);
+  localStorage.setItem(WEEKLY_STORAGE_KEY, JSON.stringify(weekly));
+  showToast('今天的饮食已登记');
+}
+
+function getTodayIndex() {
+  const day = new Date().getDay();
+  return day === 0 ? 6 : day - 1;
 }
 
 function loadMenuData() {
