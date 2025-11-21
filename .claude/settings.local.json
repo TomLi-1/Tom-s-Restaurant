@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:reactbits.dev)",
+      "WebSearch",
+      "WebFetch(domain:www.reactbits.dev)",
+      "Bash(open:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(gh repo view:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

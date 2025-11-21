@@ -111,16 +111,15 @@ function renderTodaySpecial() {
     </div>
     <div class="today-special-grid">
       ${allItems
-        .map(
-          (item) => `
+      .map(
+        (item) => `
         <div class="special-card" data-dish-id="${item.id}">
           <div class="special-image-wrapper">
             <img src="${item.image}" alt="${item.name}" class="special-img" />
-            ${
-              item.categoryId === 'drinks'
-                ? '<div class="special-badge drink-badge">饮品</div>'
-                : '<div class="special-badge dish-badge">菜品</div>'
-            }
+            ${item.categoryId === 'drinks'
+            ? '<div class="special-badge drink-badge">饮品</div>'
+            : '<div class="special-badge dish-badge">菜品</div>'
+          }
           </div>
           <div class="special-info">
             <h3 class="special-name">${item.name}</h3>
@@ -132,8 +131,8 @@ function renderTodaySpecial() {
           </div>
         </div>
       `
-        )
-        .join('')}
+      )
+      .join('')}
     </div>
   `;
 
@@ -384,8 +383,17 @@ function serveOmakase() {
   const weakSpots = weekly.days
     .map((day, idx) => ({ idx, value: day.value }))
     .sort((a, b) => a.value - b.value);
+
   const categoryPool = ['hunan', 'sichuan', 'cantonese', 'airfryer', 'fit'];
-  const nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
+
+  // Fix: If all days have 0 value (or equal), pick a random category instead of always the first one
+  let nextCategory;
+  if (weakSpots[0].value === weakSpots[weakSpots.length - 1].value) {
+    nextCategory = categoryPool[Math.floor(Math.random() * categoryPool.length)];
+  } else {
+    nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
+  }
+
   let picks = pickRandomDishes((dish) => dish.categoryId === nextCategory, 2);
   if (!picks.length) {
     picks = pickRandomDishes();
@@ -398,15 +406,15 @@ function pickRandomDishes(filterFn = () => true, count = 2) {
     (dish) => dish.categoryId !== 'drinks' && filterFn(dish)
   );
   if (!pool.length) return [];
-  const picked = [];
-  const used = new Set();
-  while (picked.length < Math.min(count, pool.length)) {
-    const candidate = pool[Math.floor(Math.random() * pool.length)];
-    if (used.has(candidate.id)) continue;
-    picked.push(candidate);
-    used.add(candidate.id);
+
+  // Fisher-Yates Shuffle for true randomness
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return picked;
+
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 function addRecommendedSet(items, message) {
@@ -740,63 +748,58 @@ function addScrollSpy() {
 function addLiquidGlassInteraction() {
   const glassCards = document.querySelectorAll('.glass-card');
   const dishCards = document.querySelectorAll('.dish-card');
-
-  // Glass card interaction
-  glassCards.forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-      if (card.style) {
-        card.style.setProperty('--mouse-x', `${x}%`);
-        card.style.setProperty('--mouse-y', `${y}%`);
-      }
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.removeProperty('--mouse-x');
-      card.style.removeProperty('--mouse-y');
-    });
-  });
-
-  // Dish card interaction
-  dishCards.forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-      if (card.style) {
-        card.style.setProperty('--mouse-x', `${x}%`);
-        card.style.setProperty('--mouse-y', `${y}%`);
-      }
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.removeProperty('--mouse-x');
-      card.style.removeProperty('--mouse-y');
-    });
-  });
-
-  // Add parallax effect for blobs on mouse move
   const heroSection = document.querySelector('.hero-section');
-  if (heroSection) {
-    heroSection.addEventListener('mousemove', (e) => {
-      const blobs = document.querySelectorAll('.blob');
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
+  const blobs = document.querySelectorAll('.blob');
 
-      blobs.forEach((blob, index) => {
-        const speed = 0.02 + (index * 0.01);
-        const x = (clientX - innerWidth / 2) * speed;
-        const y = (clientY - innerHeight / 2) * speed;
+  // Helper for throttling
+  let ticking = false;
 
-        blob.style.setProperty('--tx', `${x}px`);
-        blob.style.setProperty('--ty', `${y}px`);
+  window.addEventListener('mousemove', (e) => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const { clientX, clientY } = e;
+        const { innerWidth, innerHeight } = window;
+
+        // Update blobs
+        if (heroSection) {
+          blobs.forEach((blob, index) => {
+            const speed = 0.02 + (index * 0.01);
+            const x = (clientX - innerWidth / 2) * speed;
+            const y = (clientY - innerHeight / 2) * speed;
+            blob.style.setProperty('--tx', `${x}px`);
+            blob.style.setProperty('--ty', `${y}px`);
+          });
+        }
+
+        // Update cards
+        [...glassCards, ...dishCards].forEach(card => {
+          const rect = card.getBoundingClientRect();
+          // Only update if mouse is near/over the card to save resources
+          if (
+            clientX >= rect.left - 50 &&
+            clientX <= rect.right + 50 &&
+            clientY >= rect.top - 50 &&
+            clientY <= rect.bottom + 50
+          ) {
+            const x = ((clientX - rect.left) / rect.width) * 100;
+            const y = ((clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mouse-x', `${x}%`);
+            card.style.setProperty('--mouse-y', `${y}%`);
+          }
+        });
+
+        ticking = false;
       });
+      ticking = true;
+    }
+  });
+
+  [...glassCards, ...dishCards].forEach(card => {
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--mouse-x');
+      card.style.removeProperty('--mouse-y');
     });
-  }
+  });
 }
 
 init();
