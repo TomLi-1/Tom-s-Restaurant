@@ -416,9 +416,7 @@ function generateXiaohongshuTopics() {
     { keyword: '简单中餐', emoji: '🥢', desc: '家常美味，简单易做' },
     { keyword: '简单西餐', emoji: '🍝', desc: '浪漫氛围，精致生活' },
     { keyword: '健身餐', emoji: '💪', desc: '低卡高蛋白，吃出好身材' },
-    { keyword: '空气炸锅美食', emoji: '⚡️', desc: '万物皆可炸，懒人必备' },
-    { keyword: '减脂汤', emoji: '🥣', desc: '暖胃又掉秤' },
-    { keyword: '快手早餐', emoji: '🍳', desc: '开启元气满满的一天' }
+    { keyword: '空气炸锅美食', emoji: '⚡️', desc: '万物皆可炸，懒人必备' }
   ];
 
   // Shuffle and pick 2 distinct topics
@@ -427,12 +425,12 @@ function generateXiaohongshuTopics() {
 
   return picks.map(topic => {
     const query = `家里做 ${topic.keyword}`;
-    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    const url = `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(query)}`;
 
     return {
       title: `${topic.emoji} 去搜搜：${topic.keyword}`,
       link: url,
-      snippet: `${topic.desc} · 点击跳转 Google 搜索小红书食谱`,
+      snippet: `${topic.desc} · 点击跳转小红书搜索食谱`,
       isSearchLink: true
     };
   });
