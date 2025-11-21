@@ -30,6 +30,9 @@ img {
   max-width: 960px;
   margin: 0 auto;
   padding-bottom: 120px;
+  position: relative;
+  margin-top: -100px;
+  padding-top: 100px;
 }
 
 .app-header {
@@ -305,6 +308,28 @@ img {
 
 .dish-panel {
   padding-right: 1rem;
+}
+
+.category-section {
+  scroll-margin-top: 120px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.category-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 4px 16px rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .dish-card {
@@ -587,6 +612,16 @@ img {
     min-height: 100vh;
     min-height: -webkit-fill-available;
   }
+
+  .category-title {
+    font-size: 1.2rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .category-section {
+    margin-top: 1.5rem;
+    scroll-margin-top: 80px;
+  }
 }
 .omakase {
   margin-top: 0.6rem;
@@ -610,6 +645,18 @@ img {
   justify-content: center;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 246, 247, 0.3), rgba(255, 246, 247, 0.8));
+  pointer-events: none;
+  z-index: 2;
 }
 
 .fluid-background {

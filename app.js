@@ -76,7 +76,19 @@ function renderCategories() {
         .querySelectorAll('.category-btn')
         .forEach((el) => el.classList.remove('active'));
       btn.classList.add('active');
-      renderDishes();
+
+      // Scroll to category section
+      const categorySection = document.getElementById(`category-${category.id}`);
+      if (categorySection) {
+        const headerOffset = 100;
+        const elementPosition = categorySection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
     });
     categoryList.appendChild(btn);
   });
@@ -84,32 +96,55 @@ function renderCategories() {
 
 function renderDishes() {
   dishList.innerHTML = '';
-  getVisibleDishes().forEach((dish) => {
-    const node = dishTemplate.content.cloneNode(true);
-    node.querySelector('.dish-img').src = dish.image;
-    node.querySelector('.dish-img').alt = dish.name;
-    node.querySelector('h3').textContent = dish.name;
-    node.querySelector('.price').textContent = `¥${dish.price}`;
-    node.querySelector('.desc').textContent = dish.description;
 
-    const meta = node.querySelector('.meta');
-    meta.innerHTML = '';
-    [
-      getCategoryName(dish.categoryId),
-      `${dish.heat}`,
-      `${dish.calories} kcal`,
-      `${dish.protein}g 蛋白`
-    ]
-      .concat(dish.tags)
-      .forEach((item) => {
-        const span = document.createElement('span');
-        span.textContent = item;
-        meta.appendChild(span);
-      });
+  // Group dishes by category
+  const dishesByCategory = {};
+  categories.forEach(category => {
+    if (category.id === 'featured') return; // Skip featured category
+    dishesByCategory[category.id] = dishes.filter(dish => dish.categoryId === category.id);
+  });
 
-    const btn = node.querySelector('.add-btn');
-    btn.addEventListener('click', () => handleAddDish(dish));
-    dishList.appendChild(node);
+  // Render each category section
+  categories.forEach(category => {
+    if (category.id === 'featured') return; // Skip featured category
+
+    const categoryDishes = dishesByCategory[category.id] || [];
+    if (categoryDishes.length === 0) return;
+
+    // Create category header
+    const categoryHeader = document.createElement('div');
+    categoryHeader.className = 'category-section';
+    categoryHeader.id = `category-${category.id}`;
+    categoryHeader.innerHTML = `<h2 class="category-title">${category.emoji} ${category.name}</h2>`;
+    dishList.appendChild(categoryHeader);
+
+    // Render dishes in this category
+    categoryDishes.forEach((dish) => {
+      const node = dishTemplate.content.cloneNode(true);
+      node.querySelector('.dish-img').src = dish.image;
+      node.querySelector('.dish-img').alt = dish.name;
+      node.querySelector('h3').textContent = dish.name;
+      node.querySelector('.price').textContent = `¥${dish.price}`;
+      node.querySelector('.desc').textContent = dish.description;
+
+      const meta = node.querySelector('.meta');
+      meta.innerHTML = '';
+      [
+        `${dish.heat}`,
+        `${dish.calories} kcal`,
+        `${dish.protein}g 蛋白`
+      ]
+        .concat(dish.tags)
+        .forEach((item) => {
+          const span = document.createElement('span');
+          span.textContent = item;
+          meta.appendChild(span);
+        });
+
+      const btn = node.querySelector('.add-btn');
+      btn.addEventListener('click', () => handleAddDish(dish));
+      dishList.appendChild(node);
+    });
   });
 }
 
@@ -606,6 +641,47 @@ function handleScrollEffects() {
 
   // Add mouse move effect for liquid glass
   addLiquidGlassInteraction();
+
+  // Add scroll spy for category navigation
+  addScrollSpy();
+}
+
+function addScrollSpy() {
+  const categorySections = document.querySelectorAll('.category-section');
+  const categoryButtons = document.querySelectorAll('.category-btn');
+
+  if (!categorySections.length || !categoryButtons.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const categoryId = entry.target.id.replace('category-', '');
+
+          // Update active button
+          categoryButtons.forEach((btn) => {
+            btn.classList.remove('active');
+          });
+
+          const activeBtn = Array.from(categoryButtons).find((btn) => {
+            return btn.textContent.includes(getCategoryName(categoryId));
+          });
+
+          if (activeBtn) {
+            activeBtn.classList.add('active');
+            state.categoryId = categoryId;
+          }
+        }
+      });
+    },
+    {
+      root: null,
+      rootMargin: '-100px 0px -50% 0px',
+      threshold: 0
+    }
+  );
+
+  categorySections.forEach((section) => observer.observe(section));
 }
 
 function addLiquidGlassInteraction() {
