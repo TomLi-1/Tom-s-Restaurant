@@ -56,6 +56,7 @@ function init() {
   attachGlobalEvents();
   registerServiceWorker();
   hydrateServerKeyInput();
+  handleScrollEffects();
 }
 
 function renderCategories() {
@@ -544,6 +545,129 @@ function showToast(message) {
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function handleScrollEffects() {
+  const cartBar = document.getElementById('cartBar');
+  const heroSection = document.querySelector('.hero-section');
+  const heroContent = document.querySelector('.hero-content');
+  const heroCard = document.querySelector('.hero-card');
+  const featureCards = document.querySelectorAll('.feature-card');
+  const blobs = document.querySelectorAll('.blob');
+  const appSection = document.querySelector('.app');
+
+  if (!cartBar || !heroSection) return;
+
+  window.addEventListener('scroll', () => {
+    const heroHeight = heroSection.offsetHeight;
+    const scrollY = window.scrollY;
+    const scrollProgress = Math.min(scrollY / heroHeight, 1);
+
+    // Hide cart bar when in hero section
+    if (scrollY < heroHeight - 100) {
+      cartBar.classList.add('hidden');
+    } else {
+      cartBar.classList.remove('hidden');
+    }
+
+    // Parallax effect for hero content
+    if (heroContent && scrollY < heroHeight) {
+      const translateY = scrollY * 0.5;
+      const opacity = 1 - scrollProgress * 1.2;
+      const scale = 1 - scrollProgress * 0.1;
+
+      heroContent.style.transform = `translateY(${translateY}px) scale(${scale})`;
+      heroContent.style.opacity = Math.max(opacity, 0);
+    }
+
+    // Blob parallax with different speeds
+    blobs.forEach((blob, index) => {
+      const speed = 0.3 + (index * 0.15);
+      const translateY = scrollY * speed;
+      blob.style.transform = `translate(var(--tx, 0), ${translateY}px) scale(var(--scale, 1))`;
+    });
+
+    // Fade in app section as hero fades out
+    if (appSection && scrollY < heroHeight) {
+      const appOpacity = scrollProgress * 1.5;
+      appSection.style.opacity = Math.min(appOpacity, 1);
+    }
+  });
+
+  // Initial check
+  if (window.scrollY < heroSection.offsetHeight - 100) {
+    cartBar.classList.add('hidden');
+  }
+
+  // Initial app opacity
+  if (appSection) {
+    appSection.style.opacity = '0';
+  }
+
+  // Add mouse move effect for liquid glass
+  addLiquidGlassInteraction();
+}
+
+function addLiquidGlassInteraction() {
+  const glassCards = document.querySelectorAll('.glass-card');
+  const dishCards = document.querySelectorAll('.dish-card');
+
+  // Glass card interaction
+  glassCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      if (card.style) {
+        card.style.setProperty('--mouse-x', `${x}%`);
+        card.style.setProperty('--mouse-y', `${y}%`);
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--mouse-x');
+      card.style.removeProperty('--mouse-y');
+    });
+  });
+
+  // Dish card interaction
+  dishCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      if (card.style) {
+        card.style.setProperty('--mouse-x', `${x}%`);
+        card.style.setProperty('--mouse-y', `${y}%`);
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--mouse-x');
+      card.style.removeProperty('--mouse-y');
+    });
+  });
+
+  // Add parallax effect for blobs on mouse move
+  const heroSection = document.querySelector('.hero-section');
+  if (heroSection) {
+    heroSection.addEventListener('mousemove', (e) => {
+      const blobs = document.querySelectorAll('.blob');
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+
+      blobs.forEach((blob, index) => {
+        const speed = 0.02 + (index * 0.01);
+        const x = (clientX - innerWidth / 2) * speed;
+        const y = (clientY - innerHeight / 2) * speed;
+
+        blob.style.setProperty('--tx', `${x}px`);
+        blob.style.setProperty('--ty', `${y}px`);
+      });
+    });
+  }
 }
 
 init();
