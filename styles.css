@@ -16,7 +16,7 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(circle at top, #ffe2ec, #ffd8ea 30%, #fff6f7 65%, #fdf0f4 100%);
   min-height: 100vh;
 }
 
@@ -94,136 +94,44 @@ img {
   cursor: pointer;
 }
 
-.preferences {
+.recommendations {
+  padding: 0 1rem 1.5rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.8rem;
-  padding: 0 1rem 1.2rem;
-}
-
-.filter-group {
-  background: #fff;
-  border-radius: 18px;
-  padding: 0.9rem;
-  box-shadow: 0 12px 30px rgba(255, 86, 120, 0.12);
-}
-
-.filter-label {
-  margin: 0 0 0.4rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.filter-chip {
-  flex-shrink: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 86, 120, 0.2);
-  padding: 0.45rem 0.9rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  color: var(--muted);
-  background: #fff;
-}
-
-.filter-chip.active {
-  background: var(--pink);
-  color: #fff;
-  border-color: var(--pink);
-}
-
-.insights-panel {
-  margin: 0 1rem 1rem;
-  background: #fff;
-  border-radius: 24px;
-  padding: 1rem;
-  box-shadow: 0 20px 35px rgba(255, 86, 120, 0.15);
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1rem;
 }
 
-.insights-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-  align-items: center;
-}
-
-.insights-header h2 {
-  margin: 0.2rem 0 0;
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin: 0;
-}
-
-.log-btn {
-  border: none;
-  border-radius: 16px;
-  padding: 0.5rem 0.9rem;
-  background: rgba(255, 86, 120, 0.12);
-  color: var(--pink);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.insights-chart {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.6rem;
-}
-
-.insight-bar {
+.recommendation-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  padding: 1.2rem;
+  box-shadow: 0 25px 60px rgba(255, 86, 120, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
-.insight-bar span {
-  font-size: 0.75rem;
+.recommendation-card h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.recommendation-card p {
+  margin: 0;
   color: var(--muted);
 }
 
-.bar {
-  width: 100%;
-  height: 120px;
-  border-radius: 18px;
-  background: #ffeaf0;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-}
-
-.bar-fill {
-  width: 100%;
-  border-radius: 18px 18px 0 0;
-  background: linear-gradient(180deg, #ffd8e1, #ff5678);
-}
-
-.insights-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.insights-tags span {
+.recommendation-card button {
+  align-self: flex-start;
+  border: none;
   border-radius: 999px;
-  padding: 0.3rem 0.8rem;
-  background: #fff4f8;
-  border: 1px solid rgba(255, 86, 120, 0.2);
-  font-size: 0.8rem;
-  color: var(--muted);
+  padding: 0.45rem 1.2rem;
+  background: var(--pink);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .modal {
@@ -425,12 +333,14 @@ img {
 }
 
 .hero-card {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 20px;
-  box-shadow: 0 14px 30px rgba(255, 86, 120, 0.14);
+  background: rgba(255, 255, 255, 0.75);
+  padding: 1.2rem;
+  border-radius: 28px;
+  box-shadow: 0 25px 60px rgba(255, 86, 120, 0.18);
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
 }
 
 .hero-card h3 {
@@ -464,11 +374,13 @@ img {
   display: grid;
   grid-template-columns: 120px 1fr auto;
   gap: 0.8rem;
-  background: #fff;
-  border-radius: 20px;
-  padding: 0.8rem;
-  margin-bottom: 0.9rem;
-  box-shadow: 0 12px 24px rgba(20, 11, 13, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 24px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 .dish-img {

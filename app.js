@@ -1,8 +1,4 @@
-import {
-  categories as defaultCategories,
-  dishes as defaultDishes,
-  tasteFilters
-} from './src/data/dishes.js';
+import { categories as defaultCategories, dishes as defaultDishes } from './src/data/dishes.js';
 
 const STORAGE_KEY = 'tom-restaurant-data-v1';
 const SERVER_KEY_STORAGE = 'tom-serverchan-key';
@@ -16,15 +12,11 @@ const dishList = document.getElementById('dishList');
 const heroGrid = document.getElementById('heroGrid');
 const cartCount = document.getElementById('cartCount');
 const cartTotal = document.getElementById('cartTotal');
-const tasteFilterWrap = document.getElementById('tasteFilters');
 const moodButton = document.getElementById('moodButton');
 const dishTemplate = document.getElementById('dishTemplate');
 const checkoutBtn = document.querySelector('.checkout-btn');
 const toast = document.getElementById('toast');
-const weeklyChart = document.getElementById('weeklyChart');
-const insightSummary = document.getElementById('insightSummary');
-const weeklyBadges = document.getElementById('weeklyBadges');
-const logTodayBtn = document.getElementById('logTodayBtn');
+const recommendationGrid = document.getElementById('recommendationGrid');
 const spiceModal = document.getElementById('spiceModal');
 const spiceDishName = document.getElementById('spiceDishName');
 const spiceDishDesc = document.getElementById('spiceDishDesc');
@@ -45,7 +37,6 @@ const omakaseBtn = document.getElementById('omakaseBtn');
 
 const state = {
   categoryId: categories[0]?.id ?? 'featured',
-  tasteFilter: 'all',
   cart: {}
 };
 
@@ -61,10 +52,11 @@ let selectedSpiceLabel = '';
 
 function init() {
   renderCategories();
-  renderTasteFilters();
   renderHeroCards();
   renderDishes();
-  renderWeeklyInsights();
+  renderRecommendations(
+    dishes.filter((dish) => dish.hero && dish.categoryId !== 'drinks').slice(0, 2)
+  );
   updateCartSummary();
   attachGlobalEvents();
   registerServiceWorker();
@@ -91,28 +83,6 @@ function renderCategories() {
       renderDishes();
     });
     categoryList.appendChild(btn);
-  });
-}
-
-function renderTasteFilters() {
-  renderFilterChips(tasteFilterWrap, tasteFilters, 'tasteFilter');
-}
-
-function renderFilterChips(target, options, stateKey) {
-  if (!target) return;
-  target.innerHTML = '';
-  options.forEach((option) => {
-    const chip = document.createElement('button');
-    chip.className = 'filter-chip';
-    chip.textContent = option.label;
-    if (option.id === state[stateKey]) chip.classList.add('active');
-    chip.addEventListener('click', () => {
-      state[stateKey] = option.id;
-      target.querySelectorAll('.filter-chip').forEach((el) => el.classList.remove('active'));
-      chip.classList.add('active');
-      renderDishes();
-    });
-    target.appendChild(chip);
   });
 }
 
@@ -165,6 +135,33 @@ function renderDishes() {
   });
 }
 
+function renderRecommendations(items) {
+  if (!recommendationGrid) return;
+  recommendationGrid.innerHTML = '';
+  if (!items || !items.length) {
+    const empty = document.createElement('p');
+    empty.textContent = '点击“随机菜单”获取今日灵感 ✨';
+    empty.style.color = 'var(--muted)';
+    recommendationGrid.appendChild(empty);
+    return;
+  }
+
+  items.forEach((dish) => {
+    const card = document.createElement('article');
+    card.className = 'recommendation-card';
+    card.innerHTML = `
+      <div class=\"badge\">${getCategoryName(dish.categoryId)}</div>
+      <h3>${dish.name}</h3>
+      <p>${dish.description}</p>
+    `;
+    const btn = document.createElement('button');
+    btn.textContent = '马上安排';
+    btn.addEventListener('click', () => handleAddDish(dish));
+    card.appendChild(btn);
+    recommendationGrid.appendChild(card);
+  });
+}
+
 function getVisibleDishes() {
   return dishes.filter((dish) => {
     const isDrink = dish.categoryId === 'drinks';
@@ -172,19 +169,8 @@ function getVisibleDishes() {
       state.categoryId === 'featured'
         ? !isDrink
         : dish.categoryId === state.categoryId;
-    const matchTaste = matchTasteFilter(dish, state.tasteFilter);
-    return matchCategory && matchTaste;
+    return matchCategory;
   });
-}
-
-function matchTasteFilter(dish, filter) {
-  if (filter === 'all') return true;
-  if (filter === 'mild') return dish.tags.includes('少辣') || dish.heat === '不辣';
-  if (filter === 'spicy') return dish.tags.includes('香辣') || dish.heat.includes('🌶');
-  if (filter === 'comfort') return dish.tags.includes('下饭');
-  if (filter === 'fitness') return dish.tags.includes('健身友好');
-  if (filter === 'quick') return dish.tags.includes('快手') || dish.categoryId === 'airfryer';
-  return true;
 }
 
 function handleAddDish(dish) {
@@ -222,14 +208,6 @@ function attachGlobalEvents() {
   moodButton.addEventListener('click', openMoodModal);
 
   checkoutBtn.addEventListener('click', openCheckoutModal);
-  logTodayBtn?.addEventListener('click', () => {
-    logTodayIntake();
-    renderWeeklyInsights();
-  });
-  logTodayBtn?.addEventListener('click', () => {
-    logTodayIntake();
-    renderWeeklyInsights();
-  });
 
   spiceConfirmBtn?.addEventListener('click', handleSpiceConfirm);
   spiceModal?.addEventListener('click', (event) => {
@@ -258,8 +236,6 @@ function attachGlobalEvents() {
   });
 }
 
-const WEEKLY_STORAGE_KEY = 'tom-weekly-intake-v1';
-
 function getWeeklyData() {
   const today = new Date();
   const currentWeek = `${today.getFullYear()}-${getWeekNumber(today)}`;
@@ -282,36 +258,6 @@ function getWeekNumber(date) {
   const onejan = new Date(date.getFullYear(), 0, 1);
   const millisecsInDay = 86400000;
   return Math.ceil(((date - onejan) / millisecsInDay + onejan.getDay() + 1) / 7);
-}
-
-function renderWeeklyInsights() {
-  if (!weeklyChart || !weeklyBadges) return;
-  const data = getWeeklyData();
-  weeklyChart.innerHTML = '';
-  data.days.forEach((day) => {
-    const bar = document.createElement('div');
-    bar.className = 'insight-bar';
-    bar.innerHTML = `
-      <div class="bar">
-        <div class="bar-fill" style="height:${Math.min(day.value, 100)}%"></div>
-      </div>
-      <span>${day.label}</span>
-    `;
-    weeklyChart.appendChild(bar);
-  });
-  const avg = Math.round(data.days.reduce((sum, d) => sum + d.value, 0) / data.days.length);
-  insightSummary.textContent = avg > 70 ? '这周吃得很满足，记得多喝水 💧' : '还有空间尝试新口味 ✨';
-  weeklyBadges.innerHTML = '';
-  const badges = [];
-  if (avg < 40) badges.push('少油少盐周');
-  if (avg > 80) badges.push('重口味冒险周');
-  if (data.days.filter((d) => d.value > 60).length >= 5) badges.push('连续好胃口');
-  if (!badges.length) badges.push('记录你的每一餐');
-  badges.forEach((badge) => {
-    const span = document.createElement('span');
-    span.textContent = badge;
-    weeklyBadges.appendChild(span);
-  });
 }
 
 function getCategoryName(id) {
@@ -343,6 +289,7 @@ const moodOptions = [
   { id: 'fit', label: '健身友好', emoji: '💪' }
 ];
 let selectedMood = null;
+const WEEKLY_STORAGE_KEY = 'tom-weekly-intake-v1';
 
 function openMoodModal() {
   selectedMood = null;
@@ -373,34 +320,42 @@ function confirmMoodChoice() {
     return;
   }
   closeModal(moodModal);
-  const candidates = dishes.filter((dish) => dish.categoryId === selectedMood);
-  const choice = candidates[Math.floor(Math.random() * candidates.length)];
-  if (!choice) {
+  const picks = pickRandomDishes((dish) => dish.categoryId === selectedMood);
+  if (!picks.length) {
     showToast('该主题暂无菜品，换一个吧');
     return;
   }
-  state.categoryId = choice.categoryId;
-  state.tasteFilter = 'all';
-  renderCategories();
-  renderTasteFilters();
-  renderDishes();
-  addToCart(choice.id, { spice: getSpiceLabel(choice.spiceLevel) });
-  logDishToWeekly(choice);
-  showToast(`安排 ${choice.name}`);
+  renderRecommendations(picks);
+  showToast('已为你准备两道灵感菜');
 }
 
 function serveOmakase() {
   closeModal(moodModal);
-  const weakSpots = getWeeklyData().days
+  const weekly = getWeeklyData();
+  const weakSpots = weekly.days
     .map((day, idx) => ({ idx, value: day.value }))
     .sort((a, b) => a.value - b.value);
   const categoryPool = ['hunan', 'sichuan', 'cantonese', 'airfryer', 'fit'];
   const nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
-  const candidates = dishes.filter((dish) => dish.categoryId === nextCategory);
-  const choice = candidates[Math.floor(Math.random() * candidates.length)] || dishes[0];
-  addToCart(choice.id, { spice: getSpiceLabel(choice.spiceLevel) });
-  logDishToWeekly(choice);
-  showToast(`Omakase：${choice.name}`);
+  const picks = pickRandomDishes((dish) => dish.categoryId === nextCategory);
+  renderRecommendations(picks.length ? picks : pickRandomDishes());
+  showToast('Omakase 完成！挑一份安排给他');
+}
+
+function pickRandomDishes(filterFn = () => true, count = 2) {
+  const pool = dishes.filter(
+    (dish) => dish.categoryId !== 'drinks' && filterFn(dish)
+  );
+  if (!pool.length) return [];
+  const picked = [];
+  const used = new Set();
+  while (picked.length < Math.min(count, pool.length)) {
+    const candidate = pool[Math.floor(Math.random() * pool.length)];
+    if (used.has(candidate.id)) continue;
+    picked.push(candidate);
+    used.add(candidate.id);
+  }
+  return picked;
 }
 
 function renderSpiceOptions(activeLabel) {
@@ -491,7 +446,6 @@ async function submitOrder() {
   showToast(notifyResult.success ? '已发送给 Tom ❤️' : '订单已记录，稍后告诉 Tom');
   state.cart = {};
   updateCartSummary();
-  renderWeeklyInsights();
   closeModal(checkoutModal);
 }
 
@@ -555,15 +509,6 @@ function logDishToWeekly(dish) {
   const index = getTodayIndex();
   weekly.days[index].value = Math.min(100, weekly.days[index].value + 20);
   localStorage.setItem(WEEKLY_STORAGE_KEY, JSON.stringify(weekly));
-  renderWeeklyInsights();
-}
-
-function logTodayIntake() {
-  const weekly = getWeeklyData();
-  const index = getTodayIndex();
-  weekly.days[index].value = Math.min(100, weekly.days[index].value + 10);
-  localStorage.setItem(WEEKLY_STORAGE_KEY, JSON.stringify(weekly));
-  showToast('今天的饮食已登记');
 }
 
 function getTodayIndex() {
