@@ -377,28 +377,157 @@ function confirmMoodChoice() {
   addRecommendedSet(picks, `主题推荐：${picks.map((dish) => dish.name).join('、')}`);
 }
 
-function serveOmakase() {
-  closeModal(moodModal);
-  const weekly = getWeeklyData();
-  const weakSpots = weekly.days
-    .map((day, idx) => ({ idx, value: day.value }))
-    .sort((a, b) => a.value - b.value);
+// Google Custom Search Configuration
+// TODO: User needs to replace these with real keys for live search
+const GOOGLE_API_KEY = 'AIzaSyDgc3VEeex-i0qKnHEGegvraLUVqNl63RM';
+const GOOGLE_SEARCH_CX = '';
 
-  const categoryPool = ['hunan', 'sichuan', 'cantonese', 'airfryer', 'fit'];
+async function serveOmakase() {
+  // Show loading state
+  const originalText = omakaseBtn.textContent;
+  omakaseBtn.textContent = '正在为 Ada 寻找灵感...';
+  omakaseBtn.disabled = true;
 
-  // Fix: If all days have 0 value (or equal), pick a random category instead of always the first one
-  let nextCategory;
-  if (weakSpots[0].value === weakSpots[weakSpots.length - 1].value) {
-    nextCategory = categoryPool[Math.floor(Math.random() * categoryPool.length)];
+  try {
+    // 1. Pick 2 random local dishes
+    let localPicks = pickRandomDishes(() => true, 2);
+    if (localPicks.length < 2) {
+      localPicks = pickRandomDishes(() => true, 2); // Retry if needed
+    }
+
+    // 2. Fetch 2 external recommendations from Xiaohongshu
+    const externalPicks = await fetchXiaohongshuRecommendations();
+
+    // 3. Combine and display
+    closeModal(moodModal);
+    showOmakaseResults(localPicks, externalPicks);
+  } catch (error) {
+    console.error('Omakase failed:', error);
+    showToast('灵感枯竭了，再试一次吧');
+  } finally {
+    omakaseBtn.textContent = originalText;
+    omakaseBtn.disabled = false;
+  }
+}
+
+async function fetchXiaohongshuRecommendations() {
+  const keywords = ['简单中餐', '简单西餐', '健身餐', '空气炸锅美食'];
+  const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+  const query = `${randomKeyword} 做法`;
+
+  // Mock Mode if no keys provided
+  if (!GOOGLE_API_KEY || !GOOGLE_SEARCH_CX) {
+    console.log('Using Mock Data for Xiaohongshu Search');
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+    return [
+      {
+        title: `[小红书] ${randomKeyword} - 超级好吃的做法`,
+        link: 'https://www.xiaohongshu.com',
+        snippet: '简单易做，材料不复杂，适合懒人...',
+        thumbnail: 'https://sns-webpic-qc.xhscdn.com/202311211307/5f3e5f3e5f3e5f3e/1040g0083085f3e5f3e' // Placeholder
+      },
+      {
+        title: `[小红书] 10分钟搞定${randomKeyword}`,
+        link: 'https://www.xiaohongshu.com',
+        snippet: '不需要很多调料，健康又美味...',
+        thumbnail: 'https://sns-webpic-qc.xhscdn.com/202311211307/5f3e5f3e5f3e5f3e/1040g0083085f3e5f3e'
+      }
+    ];
+  }
+
+  try {
+    const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_SEARCH_CX}&q=${encodeURIComponent(query)}&siteSearch=xiaohongshu.com&siteSearchFilter=i&num=2&searchType=image`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data.items) return [];
+
+    return data.items.map(item => ({
+      title: item.title,
+      link: item.contextLink || item.link,
+      snippet: item.snippet || '点击查看详细做法',
+      thumbnail: item.link // For image search, link is the image URL
+    }));
+  } catch (error) {
+    console.warn('Google Search failed', error);
+    return [];
+  }
+}
+
+function showOmakaseResults(localDishes, externalDishes) {
+  // Create or reuse a modal for results
+  let resultModal = document.getElementById('omakaseResultModal');
+  if (!resultModal) {
+    resultModal = document.createElement('div');
+    resultModal.id = 'omakaseResultModal';
+    resultModal.className = 'modal';
+    resultModal.innerHTML = `
+      <div class="modal-content omakase-content">
+        <button class="modal-close" data-close>&times;</button>
+        <p class="modal-eyebrow">Omakase Menu</p>
+        <h3>今日灵感菜单</h3>
+        <div class="omakase-grid">
+          <div class="omakase-section">
+            <h4>🏠 Tom 的拿手菜</h4>
+            <div id="omakaseLocalList" class="omakase-list"></div>
+          </div>
+          <div class="omakase-section">
+            <h4>📕 小红书灵感 (点击查看)</h4>
+            <div id="omakaseExternalList" class="omakase-list"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" data-close>再想想</button>
+          <button class="primary" id="omakaseAcceptBtn">就吃这些 (添加Tom的菜)</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(resultModal);
+
+    // Attach close events
+    resultModal.addEventListener('click', (e) => {
+      if (e.target === resultModal || e.target.dataset.close !== undefined) {
+        closeModal(resultModal);
+      }
+    });
+  }
+
+  // Render Local Dishes
+  const localList = resultModal.querySelector('#omakaseLocalList');
+  localList.innerHTML = localDishes.map(dish => `
+    <div class="omakase-card local-card">
+      <img src="${dish.image}" alt="${dish.name}" />
+      <div class="omakase-info">
+        <h5>${dish.name}</h5>
+        <p>${dish.description}</p>
+      </div>
+    </div>
+  `).join('');
+
+  // Render External Dishes
+  const externalList = resultModal.querySelector('#omakaseExternalList');
+  if (externalDishes.length) {
+    externalList.innerHTML = externalDishes.map(item => `
+      <a href="${item.link}" target="_blank" class="omakase-card external-card">
+        <div class="external-icon">📕</div>
+        <div class="omakase-info">
+          <h5>${item.title.replace(' - 小红书', '').replace('...', '')}</h5>
+          <p>${item.snippet}</p>
+        </div>
+      </a>
+    `).join('');
   } else {
-    nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
+    externalList.innerHTML = '<p class="empty-tip">暂无外部灵感，网络开小差了</p>';
   }
 
-  let picks = pickRandomDishes((dish) => dish.categoryId === nextCategory, 2);
-  if (!picks.length) {
-    picks = pickRandomDishes();
-  }
-  addRecommendedSet(picks, 'Omakase：已自动安排两道菜');
+  // Handle Accept
+  const acceptBtn = resultModal.querySelector('#omakaseAcceptBtn');
+  acceptBtn.onclick = () => {
+    addRecommendedSet(localDishes, '已添加 Tom 的拿手菜，记得查看小红书教程哦');
+    closeModal(resultModal);
+  };
+
+  showModal(resultModal);
 }
 
 function pickRandomDishes(filterFn = () => true, count = 2) {
