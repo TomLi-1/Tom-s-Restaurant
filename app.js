@@ -97,44 +97,30 @@ function renderCategories() {
 
 function renderTodaySpecial() {
   const todaySpecialContainer = document.getElementById('todaySpecial');
-  if (!todaySpecialContainer) {
-    console.error('Today special container not found!');
-    return;
-  }
+  if (!todaySpecialContainer) return;
 
-  console.log('Rendering today special...');
-
-  // Select 3 featured dishes and 1 drink (Sprite or Coke, no milk tea)
-  const featuredDishIds = ['sour-beef', 'xiaochaorou', 'luroufan'];
+  const featuredDishes = pickRandomDishes(() => true, 3);
   const drinkId = Math.random() > 0.5 ? 'sprite-zero' : 'zero-coke';
-
-  const featuredDishes = featuredDishIds.map(id => {
-    const dish = dishes.find(d => d.id === id);
-    console.log(`Looking for dish ${id}:`, dish ? 'Found' : 'Not found');
-    return dish;
-  }).filter(Boolean);
-
-  const drink = dishes.find(dish => dish.id === drinkId);
-  console.log(`Looking for drink ${drinkId}:`, drink ? 'Found' : 'Not found');
-
+  const drink = dishes.find((dish) => dish.id === drinkId);
   const allItems = [...featuredDishes, drink].filter(Boolean);
-  console.log('Total items for today special:', allItems.length);
-
-  if (allItems.length === 0) {
-    console.error('No items found for today special!');
-    return;
-  }
+  if (!allItems.length) return;
 
   todaySpecialContainer.innerHTML = `
     <div class="today-special-header">
-      <h2 class="today-special-title">✨ Special Order</h2>
+      <h2 class="today-special-title">✨ Today's Special Order</h2>
     </div>
     <div class="today-special-grid">
-      ${allItems.map(item => `
+      ${allItems
+        .map(
+          (item) => `
         <div class="special-card" data-dish-id="${item.id}">
           <div class="special-image-wrapper">
             <img src="${item.image}" alt="${item.name}" class="special-img" />
-            ${item.categoryId === 'drinks' ? '<div class="special-badge drink-badge">饮品</div>' : '<div class="special-badge dish-badge">菜品</div>'}
+            ${
+              item.categoryId === 'drinks'
+                ? '<div class="special-badge drink-badge">饮品</div>'
+                : '<div class="special-badge dish-badge">菜品</div>'
+            }
           </div>
           <div class="special-info">
             <h3 class="special-name">${item.name}</h3>
@@ -145,15 +131,16 @@ function renderTodaySpecial() {
             </div>
           </div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   `;
 
-  // Add click handlers for the add buttons
-  todaySpecialContainer.querySelectorAll('.special-add-btn').forEach(btn => {
+  todaySpecialContainer.querySelectorAll('.special-add-btn').forEach((btn) => {
     const card = btn.closest('.special-card');
     const dishId = card.dataset.dishId;
-    const dish = dishes.find(d => d.id === dishId);
+    const dish = dishes.find((d) => d.id === dishId);
     if (dish) {
       btn.addEventListener('click', () => handleAddDish(dish));
     }
