@@ -124,7 +124,7 @@ function renderDishes() {
       node.querySelector('.dish-img').src = dish.image;
       node.querySelector('.dish-img').alt = dish.name;
       node.querySelector('h3').textContent = dish.name;
-      node.querySelector('.price').textContent = `¥${dish.price}`;
+      node.querySelector('.price').textContent = `$${dish.price}`;
       node.querySelector('.desc').textContent = dish.description;
 
       const meta = node.querySelector('.meta');
@@ -425,7 +425,7 @@ function renderOrderSummary(entries) {
         <p>${dish?.name ?? '未命名'} × ${entry.count}</p>
         <p class="order-spice">${entry.spice}</p>
       </div>
-      <strong>¥${(dish?.price ?? 0) * entry.count}</strong>
+      <strong>$${(dish?.price ?? 0) * entry.count}</strong>
     `;
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-btn';
@@ -475,9 +475,9 @@ async function sendWeChatNotification(order) {
   try {
     const title = `ada 下单 ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
     const lines = order.items
-      .map((item) => `- ${item.name} × ${item.count}（${item.spice}） ¥${item.price * item.count}`)
+      .map((item) => `- ${item.name} × ${item.count}（${item.spice}） $${item.price * item.count}`)
       .join('\n');
-    const body = `${lines}\n\n合计：¥${order.total}\n备注：${order.note || '无'}`;
+    const body = `${lines}\n\n合计：$${order.total}\n备注：${order.note || '无'}`;
     const params = new URLSearchParams();
     params.append('title', title);
     params.append('desp', body);
