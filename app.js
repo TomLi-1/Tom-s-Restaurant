@@ -127,8 +127,7 @@ function renderTodaySpecial() {
 
   todaySpecialContainer.innerHTML = `
     <div class="today-special-header">
-      <h2 class="today-special-title">✨ 今日推荐</h2>
-      <p class="today-special-subtitle">精选套餐 · 全部$1</p>
+      <h2 class="today-special-title">✨ Special Order</h2>
     </div>
     <div class="today-special-grid">
       ${allItems.map(item => `
