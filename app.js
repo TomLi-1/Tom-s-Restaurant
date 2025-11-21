@@ -51,7 +51,6 @@ let selectedSpiceLabel = '';
 
 function init() {
   renderCategories();
-  renderHeroCards();
   renderDishes();
   updateCartSummary();
   attachGlobalEvents();
@@ -79,24 +78,6 @@ function renderCategories() {
       renderDishes();
     });
     categoryList.appendChild(btn);
-  });
-}
-
-function renderHeroCards() {
-  heroGrid.innerHTML = '';
-  const heroDishes = dishes.filter((dish) => dish.hero);
-  heroDishes.forEach((dish) => {
-    const card = document.createElement('div');
-    card.className = 'hero-card';
-    card.innerHTML = `
-      <span class="emoji">${dish.heat.includes('🌶') ? '🔥' : '💛'}</span>
-      <p class="label">${getCategoryName(dish.categoryId)}</p>
-      <h3>${dish.name}</h3>
-      <p>${dish.description}</p>
-      <button data-dish="${dish.id}">马上安排</button>
-    `;
-    card.querySelector('button').addEventListener('click', () => handleAddDish(dish));
-    heroGrid.appendChild(card);
   });
 }
 
@@ -174,6 +155,17 @@ function updateCartSummary() {
 }
 
 function attachGlobalEvents() {
+  // Smooth scroll to menu
+  const scrollToMenuBtn = document.getElementById('scrollToMenu');
+  if (scrollToMenuBtn) {
+    scrollToMenuBtn.addEventListener('click', () => {
+      const appSection = document.querySelector('.app');
+      if (appSection) {
+        appSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
   moodButton.addEventListener('click', openMoodModal);
 
   checkoutBtn.addEventListener('click', openCheckoutModal);

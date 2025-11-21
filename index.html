@@ -11,6 +11,55 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- Fluid Glass Hero Section -->
+    <section class="hero-section">
+      <div class="fluid-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+      </div>
+
+      <div class="hero-content">
+        <div class="glass-card hero-card">
+          <div class="card-glow"></div>
+          <h1 class="hero-title">Tom's Ada 专属餐厅</h1>
+          <p class="hero-subtitle">为你精心烹制每一餐 ❤️</p>
+          <p class="hero-description">用心做菜，用爱调味<br/>每一道菜都是对你的思念</p>
+          <button class="hero-cta" id="scrollToMenu">
+            <span>开始点餐</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 4V16M10 16L4 10M10 16L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="hero-features">
+          <div class="glass-card feature-card">
+            <div class="card-glow"></div>
+            <div class="feature-icon">🍜</div>
+            <h3>精选菜单</h3>
+            <p>湘菜、川菜、粤菜<br/>应有尽有</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="card-glow"></div>
+            <div class="feature-icon">💪</div>
+            <h3>营养搭配</h3>
+            <p>卡路里、蛋白质<br/>清晰标注</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="card-glow"></div>
+            <div class="feature-icon">🌶</div>
+            <h3>辣度定制</h3>
+            <p>从微辣到特辣<br/>随你喜欢</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-indicator">
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
     <div class="app">
       <header class="app-header">
         <div class="avatar">
@@ -28,7 +77,6 @@
       <main class="app-main">
         <aside class="category-nav" id="categoryList"></aside>
         <section class="dish-panel">
-          <div class="hero-grid" id="heroGrid"></div>
           <div class="dish-list" id="dishList"></div>
         </section>
       </main>
