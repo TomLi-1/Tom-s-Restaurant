@@ -379,8 +379,8 @@ function confirmMoodChoice() {
 
 // Google Custom Search Configuration
 // TODO: User needs to replace these with real keys for live search
-const GOOGLE_API_KEY = 'AIzaSyDgc3VEeex-i0qKnHEGegvraLUVqNl63RM';
-const GOOGLE_SEARCH_CX = '';
+const GOOGLE_API_KEY = 'AIzaSyBwECCYOyYlXLGMx4RdbI-kiTeUOGbN0Dc';
+const GOOGLE_SEARCH_CX = '744b52771f93d412b';
 
 async function serveOmakase() {
   // Show loading state
