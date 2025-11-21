@@ -94,46 +94,6 @@ img {
   cursor: pointer;
 }
 
-.recommendations {
-  padding: 0 1rem 1.5rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-}
-
-.recommendation-card {
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 28px;
-  padding: 1.2rem;
-  box-shadow: 0 25px 60px rgba(255, 86, 120, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(14px);
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.recommendation-card h3 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.recommendation-card p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.recommendation-card button {
-  align-self: flex-start;
-  border: none;
-  border-radius: 999px;
-  padding: 0.45rem 1.2rem;
-  background: var(--pink);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .modal {
   position: fixed;
   inset: 0;
@@ -243,6 +203,7 @@ img {
   border-radius: 14px;
   padding: 0.7rem 1rem;
   gap: 0.6rem;
+  align-items: center;
 }
 
 .order-item p {
@@ -258,6 +219,16 @@ img {
   margin: 0;
   font-weight: 600;
   font-size: 1.1rem;
+}
+
+.remove-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  background: rgba(255, 86, 120, 0.15);
+  color: var(--pink);
+  cursor: pointer;
+  font-size: 0.85rem;
 }
 
 .field {

@@ -16,7 +16,6 @@ const moodButton = document.getElementById('moodButton');
 const dishTemplate = document.getElementById('dishTemplate');
 const checkoutBtn = document.querySelector('.checkout-btn');
 const toast = document.getElementById('toast');
-const recommendationGrid = document.getElementById('recommendationGrid');
 const spiceModal = document.getElementById('spiceModal');
 const spiceDishName = document.getElementById('spiceDishName');
 const spiceDishDesc = document.getElementById('spiceDishDesc');
@@ -54,9 +53,6 @@ function init() {
   renderCategories();
   renderHeroCards();
   renderDishes();
-  renderRecommendations(
-    dishes.filter((dish) => dish.hero && dish.categoryId !== 'drinks').slice(0, 2)
-  );
   updateCartSummary();
   attachGlobalEvents();
   registerServiceWorker();
@@ -132,33 +128,6 @@ function renderDishes() {
     const btn = node.querySelector('.add-btn');
     btn.addEventListener('click', () => handleAddDish(dish));
     dishList.appendChild(node);
-  });
-}
-
-function renderRecommendations(items) {
-  if (!recommendationGrid) return;
-  recommendationGrid.innerHTML = '';
-  if (!items || !items.length) {
-    const empty = document.createElement('p');
-    empty.textContent = '点击“随机菜单”获取今日灵感 ✨';
-    empty.style.color = 'var(--muted)';
-    recommendationGrid.appendChild(empty);
-    return;
-  }
-
-  items.forEach((dish) => {
-    const card = document.createElement('article');
-    card.className = 'recommendation-card';
-    card.innerHTML = `
-      <div class=\"badge\">${getCategoryName(dish.categoryId)}</div>
-      <h3>${dish.name}</h3>
-      <p>${dish.description}</p>
-    `;
-    const btn = document.createElement('button');
-    btn.textContent = '马上安排';
-    btn.addEventListener('click', () => handleAddDish(dish));
-    card.appendChild(btn);
-    recommendationGrid.appendChild(card);
   });
 }
 
@@ -320,13 +289,12 @@ function confirmMoodChoice() {
     return;
   }
   closeModal(moodModal);
-  const picks = pickRandomDishes((dish) => dish.categoryId === selectedMood);
+  const picks = pickRandomDishes((dish) => dish.categoryId === selectedMood, 2);
   if (!picks.length) {
     showToast('该主题暂无菜品，换一个吧');
     return;
   }
-  renderRecommendations(picks);
-  showToast('已为你准备两道灵感菜');
+  addRecommendedSet(picks, `主题推荐：${picks.map((dish) => dish.name).join('、')}`);
 }
 
 function serveOmakase() {
@@ -337,9 +305,11 @@ function serveOmakase() {
     .sort((a, b) => a.value - b.value);
   const categoryPool = ['hunan', 'sichuan', 'cantonese', 'airfryer', 'fit'];
   const nextCategory = categoryPool[weakSpots[0].idx % categoryPool.length];
-  const picks = pickRandomDishes((dish) => dish.categoryId === nextCategory);
-  renderRecommendations(picks.length ? picks : pickRandomDishes());
-  showToast('Omakase 完成！挑一份安排给他');
+  let picks = pickRandomDishes((dish) => dish.categoryId === nextCategory, 2);
+  if (!picks.length) {
+    picks = pickRandomDishes();
+  }
+  addRecommendedSet(picks, 'Omakase：已自动安排两道菜');
 }
 
 function pickRandomDishes(filterFn = () => true, count = 2) {
@@ -356,6 +326,17 @@ function pickRandomDishes(filterFn = () => true, count = 2) {
     used.add(candidate.id);
   }
   return picked;
+}
+
+function addRecommendedSet(items, message) {
+  if (!items.length) return;
+  items.forEach((dish) => addDishInstant(dish));
+  showToast(message || `已安排：${items.map((dish) => dish.name).join('、')}`);
+}
+
+function addDishInstant(dish) {
+  addToCart(dish.id, { spice: getSpiceLabel(dish.spiceLevel) });
+  logDishToWeekly(dish);
 }
 
 function renderSpiceOptions(activeLabel) {
@@ -389,7 +370,7 @@ function handleSpiceConfirm() {
 }
 
 function openCheckoutModal() {
-  const entries = Object.values(state.cart);
+  const entries = Object.entries(state.cart);
   if (!entries.length) {
     showToast('先随便挑两道菜吧～');
     return;
@@ -401,8 +382,13 @@ function openCheckoutModal() {
 
 function renderOrderSummary(entries) {
   orderList.innerHTML = '';
+  if (!entries.length) {
+    orderList.innerHTML = '<p style="color:var(--muted)">篮子空空的</p>';
+    orderTotalEl.textContent = '0';
+    return;
+  }
   const fragments = document.createDocumentFragment();
-  entries.forEach((entry) => {
+  entries.forEach(([key, entry]) => {
     const dish = dishes.find((item) => item.id === entry.id);
     const item = document.createElement('div');
     item.className = 'order-item';
@@ -413,10 +399,15 @@ function renderOrderSummary(entries) {
       </div>
       <strong>¥${(dish?.price ?? 0) * entry.count}</strong>
     `;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = '删除';
+    removeBtn.addEventListener('click', () => removeFromCart(key));
+    item.appendChild(removeBtn);
     fragments.appendChild(item);
   });
   orderList.appendChild(fragments);
-  const totalPrice = entries.reduce((sum, entry) => {
+  const totalPrice = entries.reduce((sum, [, entry]) => {
     const dish = dishes.find((item) => item.id === entry.id);
     return sum + (dish?.price ?? 0) * entry.count;
   }, 0);
@@ -514,6 +505,13 @@ function logDishToWeekly(dish) {
 function getTodayIndex() {
   const day = new Date().getDay();
   return day === 0 ? 6 : day - 1;
+}
+
+function removeFromCart(key) {
+  if (!state.cart[key]) return;
+  delete state.cart[key];
+  updateCartSummary();
+  renderOrderSummary(Object.entries(state.cart));
 }
 
 function loadMenuData() {
