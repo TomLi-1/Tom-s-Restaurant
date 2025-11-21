@@ -426,7 +426,7 @@ function generateXiaohongshuTopics() {
   const picks = shuffled.slice(0, 2);
 
   return picks.map(topic => {
-    const query = `site:xiaohongshu.com ${topic.keyword} 做法`;
+    const query = `家里做 ${topic.keyword}`;
     const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 
     return {
