@@ -378,9 +378,7 @@ function confirmMoodChoice() {
 }
 
 // Google Custom Search Configuration
-// TODO: User needs to replace these with real keys for live search
-const GOOGLE_API_KEY = 'AIzaSyBwECCYOyYlXLGMx4RdbI-kiTeUOGbN0Dc';
-const GOOGLE_SEARCH_CX = '744b52771f93d412b';
+// Scheme 2: Direct Links (No API Key required)
 
 async function serveOmakase() {
   // Show loading state
@@ -395,8 +393,11 @@ async function serveOmakase() {
       localPicks = pickRandomDishes(() => true, 2); // Retry if needed
     }
 
-    // 2. Fetch 2 external recommendations from Xiaohongshu
-    const externalPicks = await fetchXiaohongshuRecommendations();
+    // 2. Generate 2 external search topics
+    const externalPicks = generateXiaohongshuTopics();
+
+    // Simulate a small "thinking" delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     // 3. Combine and display
     closeModal(moodModal);
@@ -410,48 +411,31 @@ async function serveOmakase() {
   }
 }
 
-async function fetchXiaohongshuRecommendations() {
-  const keywords = ['简单中餐', '简单西餐', '健身餐', '空气炸锅美食'];
-  const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-  const query = `${randomKeyword} 做法`;
+function generateXiaohongshuTopics() {
+  const topics = [
+    { keyword: '简单中餐', emoji: '🥢', desc: '家常美味，简单易做' },
+    { keyword: '简单西餐', emoji: '🍝', desc: '浪漫氛围，精致生活' },
+    { keyword: '健身餐', emoji: '💪', desc: '低卡高蛋白，吃出好身材' },
+    { keyword: '空气炸锅美食', emoji: '⚡️', desc: '万物皆可炸，懒人必备' },
+    { keyword: '减脂汤', emoji: '🥣', desc: '暖胃又掉秤' },
+    { keyword: '快手早餐', emoji: '🍳', desc: '开启元气满满的一天' }
+  ];
 
-  // Mock Mode if no keys provided
-  if (!GOOGLE_API_KEY || !GOOGLE_SEARCH_CX) {
-    console.log('Using Mock Data for Xiaohongshu Search');
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-    return [
-      {
-        title: `[小红书] ${randomKeyword} - 超级好吃的做法`,
-        link: 'https://www.xiaohongshu.com',
-        snippet: '简单易做，材料不复杂，适合懒人...',
-        thumbnail: 'https://sns-webpic-qc.xhscdn.com/202311211307/5f3e5f3e5f3e5f3e/1040g0083085f3e5f3e' // Placeholder
-      },
-      {
-        title: `[小红书] 10分钟搞定${randomKeyword}`,
-        link: 'https://www.xiaohongshu.com',
-        snippet: '不需要很多调料，健康又美味...',
-        thumbnail: 'https://sns-webpic-qc.xhscdn.com/202311211307/5f3e5f3e5f3e5f3e/1040g0083085f3e5f3e'
-      }
-    ];
-  }
+  // Shuffle and pick 2 distinct topics
+  const shuffled = topics.sort(() => 0.5 - Math.random());
+  const picks = shuffled.slice(0, 2);
 
-  try {
-    const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_SEARCH_CX}&q=${encodeURIComponent(query)}&siteSearch=xiaohongshu.com&siteSearchFilter=i&num=2&searchType=image`;
-    const response = await fetch(url);
-    const data = await response.json();
+  return picks.map(topic => {
+    const query = `site:xiaohongshu.com ${topic.keyword} 做法`;
+    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 
-    if (!data.items) return [];
-
-    return data.items.map(item => ({
-      title: item.title,
-      link: item.contextLink || item.link,
-      snippet: item.snippet || '点击查看详细做法',
-      thumbnail: item.link // For image search, link is the image URL
-    }));
-  } catch (error) {
-    console.warn('Google Search failed', error);
-    return [];
-  }
+    return {
+      title: `${topic.emoji} 去搜搜：${topic.keyword}`,
+      link: url,
+      snippet: `${topic.desc} · 点击跳转 Google 搜索小红书食谱`,
+      isSearchLink: true
+    };
+  });
 }
 
 function showOmakaseResults(localDishes, externalDishes) {
